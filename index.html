@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marks Prediction Model</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+    .input{
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+      
+    }
+    
+    .button1{
+        align-items: center;
+        display: flex;
+        
+        flex-direction: column;
+    }
+    </style>
+</head>
+<body>
+    <div class="input">
+    <div class="heading">
+    <h1>Student Marks Prediction</h1>
+    </div>
+
+    <!-- Input form -->
+     <div class="form">
+    <form id="predictionForm">
+        <label for="time_study">Time Studied (hours):</label>
+        <input type="number" id="time_study" name="time_study" step="0.1" required>
+        <br><br>
+        <label for="number_courses">Number of Courses:</label>
+        <input type="number" id="number_courses" name="number_courses" required>
+        <br><br>
+        <div class="button1">
+        <button type="submit">Predict Marks</button>
+    </div>
+    </form>
+     </div>
+     <div class="result">
+    <h3>Predicted Marks: <span id="predictedMarks"></span></h3>
+    </div>
+</div>
+    <!-- Plot area -->
+    <div id="plot"></div>
+    
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent form from refreshing the page
+            
+            // Get form data
+            const time_study = document.getElementById("time_study").value;
+            const number_courses = document.getElementById("number_courses").value;
+            
+            // Send data to the Flask backend
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `time_study=${time_study}&number_courses=${number_courses}`,
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display predicted marks
+                document.getElementById("predictedMarks").innerText = data.predicted_marks;
+
+                // Render the plot using Plotly
+                const plot = JSON.parse(data.plot);
+                Plotly.react('plot', plot.data, plot.layout);
+            });
+        });
+    </script>
+    
+</body>
+</html>
